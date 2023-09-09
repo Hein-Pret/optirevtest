@@ -25,7 +25,7 @@
 
     // Push data to the Google Sheets via Google App Script
     const pushDataToEndpoint = (data) => {
-        const googleAppScriptURL = "YOUR_GOOGLE_APP_SCRIPT_URL_HERE";
+        const googleAppScriptURL = "https://script.google.com/macros/s/AKfycbznYENcV0cOHkzlgos5Sw5JYM34agJywswT3-eK1-RPnQzaDBSuSsG8MPI8qf8Qh-HI/exec";
         fetch(googleAppScriptURL, {
             method: 'POST',
             body: JSON.stringify(data),
