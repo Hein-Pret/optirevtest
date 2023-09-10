@@ -1,5 +1,5 @@
 (function() {
-    // Generate a unique ID for the visitor
+    // Function to generate a unique ID for the visitor
     const generateUUID = () => {
         let d = new Date().getTime();
         const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -10,7 +10,7 @@
         return uuid;
     };
 
-    // Get UTM parameters from the URL
+    // Function to get UTM parameters from the URL
     const getUTMParameters = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const utms = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
@@ -23,23 +23,22 @@
         return utmData;
     };
 
-    // Push data to the Google Sheets via Google App Script
-    const pushDataToEndpoint = (data) => {
-        const googleAppScriptURL = "https://script.google.com/macros/s/AKfycbw2en-U6FmRzGKICpGAzvZPJUuKKO1Z0KXJQVxc35s0iO0ozz7rJ6-ir2qkr-tjY9_U/exec";
-        fetch(googleAppScriptURL, {
+    // Function to push data to the server (which in turn pushes to Google Sheets)
+    const pushDataToServer = (data) => {
+        const serverEndpoint = 'https://YOUR_SERVER_URL/postToSheet';
+        fetch(serverEndpoint, {
             method: 'POST',
             body: JSON.stringify(data),
             headers: {
                 'Content-Type': 'application/json'
             }
-        });
+        }).catch(error => console.error("Error sending data to server:", error));
     };
 
-    // Main Function
+    // Main function
     const main = () => {
         const visitorID = generateUUID();
         const utmParameters = getUTMParameters();
-
         const pageVisit = {
             type: 'page_visit',
             url: window.location.href,
@@ -47,8 +46,7 @@
             visitorID,
             ...utmParameters
         };
-
-        pushDataToEndpoint(pageVisit);
+        pushDataToServer(pageVisit);
 
         // Event Listener for form submissions
         document.body.addEventListener('submit', (e) => {
@@ -64,7 +62,7 @@
                 formData.forEach((value, key) => {
                     formSubmission.data[key] = value;
                 });
-                pushDataToEndpoint(formSubmission);
+                pushDataToServer(formSubmission);
             }
         });
     };
