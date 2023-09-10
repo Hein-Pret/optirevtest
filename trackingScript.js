@@ -25,7 +25,7 @@
 
     // Function to push data to the server (which in turn pushes to Google Sheets)
     const pushDataToServer = (data) => {
-        const serverEndpoint = 'https://YOUR_SERVER_URL/postToSheet';
+        const serverEndpoint = 'https://git.heroku.com/trackingscriptserver.git/postToSheet';
         fetch(serverEndpoint, {
             method: 'POST',
             body: JSON.stringify(data),
