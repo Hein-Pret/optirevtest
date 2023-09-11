@@ -56,7 +56,7 @@ app.post('/postToSheet', (req, res) => {
             console.log(err);
             res.status(500).send('Error writing to Google Sheets');
         } else {
-            res.status(200).send('Successfully wrote to Google Sheets');
+            res.status(200).send('Successfully wrote to Google Sheets!');
         }
     });
 });
