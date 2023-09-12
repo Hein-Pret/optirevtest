@@ -37,34 +37,42 @@
 
     // Main function
     const main = () => {
-        const visitorID = generateUUID();
-        const utmParameters = getUTMParameters();
-        const pageVisit = {
-            type: 'page_visit',
-            url: window.location.href,
-            timestamp: new Date().toISOString(),
-            visitorID,
-            ...utmParameters
-        };
-        pushDataToServer(pageVisit);
+        // Initilize the FingerprintJS agent with load()
+        const fpPromise = import('https://fpjscdn.net/v3/yOO9HZaOAB9uTUQxqdeU')
+            .then(FingerprintJS => FingerprintJS.load());
 
-        // Event Listener for form submissions
-        document.body.addEventListener('submit', (e) => {
-            if (e.target && e.target.tagName === 'FORM') {
-                const formData = new FormData(e.target);
-                const formSubmission = {
-                    type: 'form_submission',
-                    data: {},
+        fpPromise
+            .then(fp => fp.get())
+            .then(result => {
+                const visitorID = result.visitorId || generateUUID();
+                const utmParameters = getUTMParameters();
+                const pageVisit = {
+                    type: 'page_visit',
+                    url: window.location.href,
                     timestamp: new Date().toISOString(),
                     visitorID,
                     ...utmParameters
                 };
-                formData.forEach((value, key) => {
-                    formSubmission.data[key] = value;
+                pushDataToServer(pageVisit);
+
+                // Event Listener for form submissions
+                document.body.addEventListener('submit', (e) => {
+                    if (e.target && e.target.tagName === 'FORM') {
+                        const formData = new FormData(e.target);
+                        const formSubmission = {
+                            type: 'form_submission',
+                            data: {},
+                            timestamp: new Date().toISOString(),
+                            visitorID,
+                            ...utmParameters
+                        };
+                        formData.forEach((value, key) => {
+                            formSubmission.data[key] = value;
+                        });
+                        pushDataToServer(formSubmission);
+                    }
                 });
-                pushDataToServer(formSubmission);
-            }
-        });
+            });
     };
 
     // Initialize
