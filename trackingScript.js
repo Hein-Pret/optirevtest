@@ -1,5 +1,5 @@
 (function() {
-    // Function to generate a unique ID for the visitor
+    // Function to generate a unique ID for the visitor (fallback if FingerprintJS fails)
     const generateUUID = () => {
         let d = new Date().getTime();
         const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -36,43 +36,49 @@
     };
 
     // Main function
-    const main = () => {
-        // Initilize the FingerprintJS agent with load()
-        const fpPromise = import('https://fpjscdn.net/v3/yOO9HZaOAB9uTUQxqdeU')
-            .then(FingerprintJS => FingerprintJS.load());
+    const main = async () => {
+        let visitorID = localStorage.getItem('visitorID');
 
-        fpPromise
-            .then(fp => fp.get())
-            .then(result => {
-                const visitorID = result.visitorId || generateUUID();
-                const utmParameters = getUTMParameters();
-                const pageVisit = {
-                    type: 'page_visit',
-                    url: window.location.href,
+        if (!visitorID) {
+            try {
+                const fp = await import('https://fpjscdn.net/v3/your-public-api-key').then(FingerprintJS => FingerprintJS.load());
+                const result = await fp.get();
+                visitorID = result.visitorId;
+                localStorage.setItem('visitorID', visitorID);
+            } catch (error) {
+                console.error("Error with FingerprintJS:", error);
+                visitorID = generateUUID();
+                localStorage.setItem('visitorID', visitorID);
+            }
+        }
+
+        const utmParameters = getUTMParameters();
+        const pageVisit = {
+            type: 'page_visit',
+            url: window.location.href,
+            timestamp: new Date().toISOString(),
+            visitorID,
+            ...utmParameters
+        };
+        pushDataToServer(pageVisit);
+
+        // Event Listener for form submissions
+        document.body.addEventListener('submit', (e) => {
+            if (e.target && e.target.tagName === 'FORM') {
+                const formData = new FormData(e.target);
+                const formSubmission = {
+                    type: 'form_submission',
+                    data: {},
                     timestamp: new Date().toISOString(),
                     visitorID,
                     ...utmParameters
                 };
-                pushDataToServer(pageVisit);
-
-                // Event Listener for form submissions
-                document.body.addEventListener('submit', (e) => {
-                    if (e.target && e.target.tagName === 'FORM') {
-                        const formData = new FormData(e.target);
-                        const formSubmission = {
-                            type: 'form_submission',
-                            data: {},
-                            timestamp: new Date().toISOString(),
-                            visitorID,
-                            ...utmParameters
-                        };
-                        formData.forEach((value, key) => {
-                            formSubmission.data[key] = value;
-                        });
-                        pushDataToServer(formSubmission);
-                    }
+                formData.forEach((value, key) => {
+                    formSubmission.data[key] = value;
                 });
-            });
+                pushDataToServer(formSubmission);
+            }
+        });
     };
 
     // Initialize
@@ -82,3 +88,4 @@
         window.addEventListener('DOMContentLoaded', main);
     }
 })();
+
