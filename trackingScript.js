@@ -41,7 +41,7 @@
 
         if (!visitorID) {
             try {
-                const fp = await import('https://fpjscdn.net/v3/your-public-api-key').then(FingerprintJS => FingerprintJS.load());
+                const fp = await import('https://fpjscdn.net/v3/yOO9HZaOAB9uTUQxqdeU').then(FingerprintJS => FingerprintJS.load());
                 const result = await fp.get();
                 visitorID = result.visitorId;
                 localStorage.setItem('visitorID', visitorID);
