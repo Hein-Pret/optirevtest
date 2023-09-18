@@ -43,7 +43,7 @@
             try {
                 const fp = await import('https://fpjscdn.net/v3/yOO9HZaOAB9uTUQxqdeU').then(FingerprintJS => FingerprintJS.load());
                 const result = await fp.get();
-                visitorID = result.visitorId;
+                visitorID = result.visitorID;
                 localStorage.setItem('visitorID', visitorID);
             } catch (error) {
                 console.error("Error with FingerprintJS:", error);
