@@ -38,6 +38,7 @@
     // Main function
     const main = async () => {
         let visitorID = localStorage.getItem('visitorID');
+        console.log("current VistorID",visitorID)
 
         if (!visitorID) {
             try {
@@ -45,6 +46,7 @@
                 const result = await fp.get();
                 visitorID = result.visitorID;
                 localStorage.setItem('visitorID', visitorID);
+                console.log("Fingerprint working",visitorID)
             } catch (error) {
                 console.error("Error with FingerprintJS:", error);
                 visitorID = generateUUID();
@@ -60,6 +62,7 @@
             visitorID,
             ...utmParameters
         };
+        console.log("pageVisit data", pageVisit)
         pushDataToServer(pageVisit);
 
         // Event Listener for form submissions
@@ -73,9 +76,10 @@
                     email: email,
                     name: name,
                     timestamp: new Date().toISOString(),
-                    visitorID
+                    visitorID,
+                    ...utmParameters
                 };
-               
+                console.log("formSubmission data", formSubmission)
                 pushDataToServer(formSubmission);
             }
         });
